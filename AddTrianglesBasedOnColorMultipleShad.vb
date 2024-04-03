@@ -16,18 +16,16 @@ Sub AddTrianglesBasedOnColorMultipleShades()
     red4 = RGB(245, 207, 211) ' 90% significance - Red
 
     ' Set the target range where you want to apply the triangles
-    Set rng = ThisWorkbook.Sheets("Q39").Range("C6:L17")
+    Set rng = ThisWorkbook.Sheets("SHEETNAME").Range("A1:Z26")
     
     For Each cell In rng
         ' Check if the cell's fill is any of the green shades
         If cell.Interior.Color = green1 Or cell.Interior.Color = green2 Or cell.Interior.Color = green3 Or cell.Interior.Color = green4 Then
             cell.NumberFormat = "0%" & ChrW(9650) ' Up-pointing triangle
-            cell.Font.Color = RGB(0, 176, 80) ' Green color for the triangle
             cell.Interior.Color = RGB(255, 255, 255) ' Set cell interior to white (remove shading)
         ' Check if the cell's fill is any of the red shades
         ElseIf cell.Interior.Color = red1 Or cell.Interior.Color = red2 Or cell.Interior.Color = red3 Or cell.Interior.Color = red4 Then
             cell.NumberFormat = "0%" & ChrW(9660) ' Down-pointing triangle
-            cell.Font.Color = RGB(255, 0, 0) ' Red color for the triangle
             cell.Interior.Color = RGB(255, 255, 255) ' Set cell interior to white (remove shading)
         Else
             cell.Interior.Color = RGB(255, 255, 255) ' Set cell interior to white (remove shading)

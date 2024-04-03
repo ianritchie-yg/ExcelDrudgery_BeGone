@@ -31,4 +31,3 @@ Sub ChangeTriangleColorsInTables()
         Next shp
     Next sld
 End Sub
-
