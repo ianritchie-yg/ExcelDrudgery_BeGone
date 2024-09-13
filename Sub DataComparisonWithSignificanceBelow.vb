@@ -1,0 +1,105 @@
+Sub DataComparisonWithSignificanceBelow()
+    Dim ws As Worksheet
+    Dim rng As Range
+    Dim outputSheet As Worksheet
+    Dim i As Long, j As Long
+    Dim columnCount As Long
+    Dim rowCount As Long
+    Dim newRowCount As Long
+    Dim dataStartRow As Long
+    Dim fontSize As Integer
+    Dim fillColor As String
+    Dim fontColor As String
+
+    ' Set the worksheet
+    Set ws = ActiveSheet
+
+    ' Prompt user to select the range
+    On Error Resume Next
+    Set rng = Application.InputBox("Select the range containing your data (including headers):", "Select Range", Type:=8)
+    On Error GoTo 0
+
+    If rng Is Nothing Then
+        MsgBox "No range selected. Exiting macro.", vbExclamation
+        Exit Sub
+    End If
+
+    ' Get dimensions of the selected range, be sure to start at row 1 and column 1, and have headers in row 1 and letters representing the headers in row2, so frequencies start in row 3
+    columnCount = rng.Columns.Count
+    rowCount = rng.Rows.Count
+
+    ' Get user input for font size
+    fontSize = InputBox("Enter the font size for the significance letters:", "Font Size", 8)
+
+    ' Get user input for fill color (hex color code)
+    fillColor = InputBox("Enter the fill color as a hex color code (e.g., FFFF00 for yellow):", "Fill Color", "FFFFFF")
+
+    ' Get user input for font color (hex color code)
+    fontColor = InputBox("Enter the font color as a hex color code (e.g., FF0000 for red):", "Font Color", "000000")
+
+    ' Create output sheet
+    Set outputSheet = ThisWorkbook.Worksheets.Add(After:=ws)
+    outputSheet.Name = "Data Comparison Results"
+
+    ' Copy the entire range to the new sheet
+    rng.Copy outputSheet.Range("A1")
+
+    ' Assuming data starts from row 3
+    dataStartRow = 3
+
+    ' Initialize newRowCount
+    newRowCount = rowCount
+
+    ' Insert a new row after each data row for significance letters
+    For i = dataStartRow + rowCount - dataStartRow To dataStartRow Step -1
+        outputSheet.Rows(i + 1).Insert Shift:=xlDown, CopyOrigin:=xlFormatFromLeftOrAbove
+    Next i
+
+    ' Update newRowCount after inserting rows
+    newRowCount = rowCount + (rowCount - dataStartRow + 1)
+
+    ' Move significance letters to the row below their corresponding frequencies
+    For i = dataStartRow To newRowCount Step 2
+        For j = 2 To columnCount - 1 Step 2 ' Frequencies are in columns 2, 4, 6
+            If Not IsEmpty(outputSheet.Cells(i, j + 1).Value) Then
+                ' Move letter to the row below frequency
+                outputSheet.Cells(i + 1, j).Value = outputSheet.Cells(i, j + 1).Value
+                ' Clear the original letter cell
+                outputSheet.Cells(i, j + 1).ClearContents
+            End If
+        Next j
+    Next i
+
+    ' Format significance letter cells
+    For i = dataStartRow + 1 To newRowCount Step 2
+        For j = 2 To columnCount - 1 Step 2
+            With outputSheet.Cells(i, j)
+                .Font.Size = fontSize
+                .Font.Color = ColorValue(fontColor)
+                .Interior.Color = ColorValue(fillColor)
+            End With
+        Next j
+    Next i
+
+    ' Format the output
+    With outputSheet.UsedRange
+        .Columns.AutoFit
+        .HorizontalAlignment = xlCenter
+        .VerticalAlignment = xlCenter
+    End With
+
+    MsgBox "Data comparison table created. Results are in the new sheet 'Data Comparison Results'.", vbInformation
+End Sub
+
+Function ColorValue(hexColor As String) As Long
+    ' Converts a hex color code to an RGB value
+    Dim r As Long, g As Long, b As Long
+    If Len(hexColor) = 6 Then
+        r = CLng("&H" & Mid(hexColor, 1, 2))
+        g = CLng("&H" & Mid(hexColor, 3, 2))
+        b = CLng("&H" & Mid(hexColor, 5, 2))
+    Else
+        r = 0: g = 0: b = 0
+    End If
+    ColorValue = RGB(r, g, b)
+End Function
